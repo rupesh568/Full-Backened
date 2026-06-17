@@ -1,0 +1,20 @@
+{
+  "name": "backenedproject",
+  "version": "1.0.0",
+  "description": "This is a full backened project",
+  "keywords": [
+    "javascript",
+    "backened",
+    "fullstack"
+  ],
+  "license": "ISC",
+  "author": "Rupesh Kumar Chaudhary",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}
