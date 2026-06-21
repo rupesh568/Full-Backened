@@ -19,7 +19,7 @@ import userRouter from "./routes/user.routes.js";
 
 //routes declaration
 
-app.use('/users',userRouter)
-//http:localhost:6000/users/register/
+app.use('api/v1/users',userRouter)
+//http:localhost:6000/api/v1/users/register/
 
 export default app;
