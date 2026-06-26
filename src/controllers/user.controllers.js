@@ -2,6 +2,8 @@ import { ApiError } from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/Apiresponse.js";
+import { response } from "express";
 
 const userRegister=asyncHandler(async (req,res)=>{
     // res.status(200).json({
@@ -14,7 +16,7 @@ const userRegister=asyncHandler(async (req,res)=>{
     //check for images,check for avatar
     //upload images and avatar to cloudinary
     //create user object and placed it into db
-    //remove password and refresh token from response
+    //remove password and refresh token from response;
     //check for user creation
     //if user is created send response if not created
     //send error
@@ -81,7 +83,7 @@ const userRegister=asyncHandler(async (req,res)=>{
 
     if(!coverImage){
         throw new ApiError(400,"CoverImage is required")
-    }
+    }   /*here the avatar is being made by using if condtion ,if there is no avatar than it will throw error to user*/
 
     const user=await User.create({
         fullName,
@@ -89,9 +91,22 @@ const userRegister=asyncHandler(async (req,res)=>{
         coverImage:coverImage.url,
         userName,
         password,
-        userName:userName.toLowerCase();
+        userName:userName.toLowerCase()
 
     })
+
+    const createdUser=await User.findById(user._id).select(
+        "-password -refreshToken"
+    )
+
+
+    if(!createdUser){
+        throw new ApiError(500,"something went wrong while registering the user!")
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200,createdUser,"user is created successfully !")
+    )
 })
 
 export {userRegister}
