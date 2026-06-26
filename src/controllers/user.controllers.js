@@ -1,6 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
-
+import { User } from "../models/user.model.js";
 const userRegister=asyncHandler(async (req,res)=>{
     res.status(200).json({
         message:"ok",
@@ -35,6 +35,25 @@ const userRegister=asyncHandler(async (req,res)=>{
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if(!emailRegex.test(email)){
         throw new ApiError(400,"Email is not correct format !")
+    }
+
+    const existeduser=User.findOne({
+        $or:[{ userName },{ email }]
+    })
+
+    if(existeduser){
+        throw new ApiError(409,`${userName} already existed and ${email } also already existed`)
+    }
+
+    const existedUsername=User.findOne({userName})
+    if(existedUsername){
+        throw new ApiError(409,"username already exists ! enter another one")
+    }
+
+
+    const existedEmail=User.findOne({email})
+    if(existedEmail){
+        throw new ApiError(409,"email already exists enter the new one")
     }
 })
 
