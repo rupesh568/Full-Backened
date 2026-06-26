@@ -1,3 +1,4 @@
+import { ApiError } from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const userRegister=asyncHandler(async (req,res)=>{
@@ -22,6 +23,19 @@ const userRegister=asyncHandler(async (req,res)=>{
     const {userName,password,email,fullName}=req.body
     console.log("email:",email)
     console.log("password",password)
+    
+
+    if(!fullName || !password || !email || !userName){
+        throw new ApiError(400,"All fields are required")
+    }
+
+    if(password.length <8){
+        throw new ApiError(400,"password is of less character")
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegex.test(email)){
+        throw new ApiError(400,"Email is not correct format !")
+    }
 })
 
 export {userRegister}
