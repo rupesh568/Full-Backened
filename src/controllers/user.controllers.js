@@ -42,7 +42,7 @@ const userRegister=asyncHandler(async (req,res)=>{
         throw new ApiError(400,"Email is not correct format !")
     }
 
-    const existeduser=User.findOne({
+    const existeduser=await User.findOne({
         $or:[{ userName },{ email }]
     })
     console.log(existeduser)
@@ -51,22 +51,22 @@ const userRegister=asyncHandler(async (req,res)=>{
         throw new ApiError(409,`${userName} already existed and ${email } also already existed`)
     }
 
-    const existedUsername=User.findOne({userName})
-    if(existedUsername){
-        throw new ApiError(409,"username already exists ! enter another one")
-    }
+    // const existedUsername=User.findOne({userName})
+    // if(existedUsername){
+    //     throw new ApiError(409,"username already exists ! enter another one")
+    // }
 
 
-    const existedEmail=User.findOne({email})
-    if(existedEmail){
-        throw new ApiError(409,"email already exists enter the new one")
-    }
+    // const existedEmail=User.findOne({email})
+    // if(existedEmail){
+    //     throw new ApiError(409,"email already exists enter the new one")
+    // }
 
     const avatarLocalPath=req.files?.avatar[0]?.path;
     const coverImageLocalPath=req.files?.coverImage[0]?.path;
 
     if(!avatarLocalPath){
-        throw new ApiError(400,"Avatar is required")
+        throw new ApiError(400,"Avatar is compulsory")
     }
 
     if(!coverImageLocalPath){
@@ -89,7 +89,6 @@ const userRegister=asyncHandler(async (req,res)=>{
         fullName,
         avatar:avatar.url,
         coverImage:coverImage.url,
-        userName,
         password,
         userName:userName.toLowerCase()
 
