@@ -16,7 +16,12 @@ const userRegister=asyncHandler(async (req,res)=>{
     //if user is created send response if not created
     //send error
 
+
+
     })
+    const {userName,password,email,fullName}=req.body
+    console.log("email:",email)
+    console.log("password",password)
 })
 
 export {userRegister}
