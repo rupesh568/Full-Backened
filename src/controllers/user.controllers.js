@@ -20,6 +20,7 @@ const userRegister=asyncHandler(async (req,res)=>{
 
 
     })
+    
     const {userName,password,email,fullName}=req.body
     console.log("email:",email)
     console.log("password",password)
@@ -40,6 +41,7 @@ const userRegister=asyncHandler(async (req,res)=>{
     const existeduser=User.findOne({
         $or:[{ userName },{ email }]
     })
+    console.log(existeduser)
 
     if(existeduser){
         throw new ApiError(409,`${userName} already existed and ${email } also already existed`)
@@ -54,6 +56,17 @@ const userRegister=asyncHandler(async (req,res)=>{
     const existedEmail=User.findOne({email})
     if(existedEmail){
         throw new ApiError(409,"email already exists enter the new one")
+    }
+
+    const avatarLocalPath=req.files?.avatar[0]?.path;
+    const coverImageLocalPath=req.files?.coverImage[0]?.path;
+
+    if(!avatarLocalPath){
+        throw new ApiError(400,"Avatar is required")
+    }
+
+    if(!coverImageLocalPath){
+        throw new ApiError(400,"CoverImage is required")
     }
 })
 
