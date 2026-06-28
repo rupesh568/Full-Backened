@@ -272,5 +272,11 @@ const refreshTokenAccess=asyncHandler(async(req,res)=>{
 
 })
 
+const changePassword=asyncHandler(async(req,res)=>{
+
+})
+
+
+
 
 export {userRegister,loginUser,loogedOut,refreshTokenAccess}
