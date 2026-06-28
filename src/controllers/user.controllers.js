@@ -65,17 +65,25 @@ const userRegister=asyncHandler(async (req,res)=>{
     // }
     console.log(req.files)
     const avatarLocalPath=req.files?.avatar[0]?.path;
-    const coverImageLocalPath=req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath=req.files?.coverImage[0]?.path;
+
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0){
+        coverImageLocalPath=req.files.coverImage[0].path;
+
+    }
+
 
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar is compulsory")
     }
 
-    if(!coverImageLocalPath){
-        throw new ApiError(400,"CoverImage is required")
-    }
+    // if(!coverImageLocalPath){
+    //     throw new ApiError(400,"CoverImage is required")
+    // }
 
     const avatar=await uploadOnCloudinary(avatarLocalPath)
+    /* console.log(avatar) this gives the object which contains alot of information but we just need its url;*/
     const coverImage=await uploadOnCloudinary(coverImageLocalPath)
 
 
@@ -83,14 +91,14 @@ const userRegister=asyncHandler(async (req,res)=>{
         throw new ApiError(400,"Avatar is required")
     }
 
-    if(!coverImage){
-        throw new ApiError(400,"CoverImage is required")
+    /*if(!coverImage){
+        throw new ApiError(400,"CoverImage is required") //see here we are taking coverimage as optional ,so if user doesnot enter it than it should not throw error that is why we have not written throw error.
     }   /*here the avatar is being made by using if condtion ,if there is no avatar than it will throw error to user*/
 
     const user=await User.create({
         fullName,
         avatar:avatar.url,
-        coverImage:coverImage.url,
+        coverImage:coverImage ? coverImage.url : "",
         password,
         userName:userName.toLowerCase(),
         email,
