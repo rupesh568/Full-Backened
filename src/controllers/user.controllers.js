@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import { response } from "express";
 console.log("everything is not fine")
+import jwt from "jsonwebtoken";
 
 const generateAccessTokenAndRefreshToken=async(userId)=>{
     const user=await User.findById(userId)
@@ -229,6 +230,47 @@ const loogedOut=asyncHandler(async(req,res)=>{
 
 })
 
+const refreshTokenAccess=asyncHandler(async(req,res)=>{
+    const incomingRefreshToken=req.cookies?.refreshToken || req.body?.refreshToken  //see what is happening here is that the browser of computer and mobile phone will send their refresh token from cookie when the accesstoken is at the verge of expiring but the user still want to access the website
+    if(!incomingRefreshToken){
+        throw new ApiError(401,"Invalid Request as Refresh Token doesnot exist")
+    }
+    try{
+        const decodedToken=jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET)
+
+        const user=await User.findById(decodedToken._id)
+
+        if(!user){
+            throw new ApiError(401,"Invalid refresh Token")
+        }
+        if(incomingRefreshToken!==user?.refreshToken){
+            throw new ApiError(401,"Refresh Token is expired !,Login again")
+        }
+
+        const option={
+            httpOnly:true,
+            secure:true
+        }
+        const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(user._id)
+
+        return res
+        .status(200)
+        .cookie("accessToken",accessToken,option)
+        .cookie("refreshToken",refreshToken,option)
+        .json(
+            new ApiResponse(
+               201,
+               {
+                    accessToken,refreshToken
+               },
+               "Access Token Refreshed"
+            )
+        )
+    }catch(error){
+        throw new ApiError(401,error?.message || "Invalid Access Token")
+    }
+
+})
 
 
-export {userRegister,loginUser,loogedOut}
+export {userRegister,loginUser,loogedOut,refreshTokenAccess}
