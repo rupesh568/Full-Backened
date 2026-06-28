@@ -60,7 +60,7 @@ userSchema.methods.isPasswordCheck=async function (password) {
     
 }
 
-userSchema.methods.generateAccessToken=async function () {
+userSchema.methods.generateAccessToken= async function () {
     return await jwt.sign(
         {
             _id:this._id,
@@ -75,14 +75,14 @@ userSchema.methods.generateAccessToken=async function () {
     )
 }
 
-userSchema.methods.generateRefeshToken=async function () {
+userSchema.methods.generateRefeshToken= async function () {
     return await jwt.sign(
         {
             _id:this._id
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn:REFRESH_TOKEN_EXPIRY,
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRY,
         }
     )
     

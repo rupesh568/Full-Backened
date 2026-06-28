@@ -5,6 +5,24 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import { response } from "express";
 console.log("everything is not fine")
+
+const generateAccessTokenAndRefreshToken=async(userId)=>{
+    const user=await User.findById(userId)
+    console.log(user)
+    const accessToken=await user.generateAccessToken()
+    console.log(accessToken)
+    const refreshToken=await user.generateRefeshToken()
+    console.log(refreshToken)
+
+    user.refreshToken=refreshToken
+    await user.save({validateBeforeSave:false})
+
+    return {accessToken,refreshToken}
+
+
+}
+
+
 const userRegister=asyncHandler(async (req,res)=>{
 
     console.log("everything is fine")
@@ -119,4 +137,97 @@ const userRegister=asyncHandler(async (req,res)=>{
     )
 })
 
-export {userRegister}
+const loginUser=asyncHandler(async(req,res)=>{
+    //take all the fields required for login :like email,password,username from req.body
+    //validataion-check whether user have entered all the required fields
+
+    //check the required fileds matches in the database  or not ;that means check whether the user with this username or email exists or not
+    //if the username or email doesnot exists than give an option to register or enter some other email or password
+    //if the user exists than 
+
+    //check the password -
+    //if it matches give access  - give accesstoken as well so that user can go to anyfiled like their profile,home,post and generate refresh token
+    //send cookies
+    //if doesnot matches throw error showing incorrect password
+
+    const {userName,email,password}=req.body
+    console.log("userName:",userName)
+    console.log("password:",password)
+
+    if(!(userName || email)){
+        throw new ApiError(400,"username or email is required")
+    }
+
+    const userExistence=await User.findOne({
+        $or:[{userName},{email}]
+    })
+    console.log(userExistence)
+
+    if(!userExistence){
+        throw new ApiError(400,"userName or email doesnot exist ,please enter the correct one")
+    }
+
+    const isPasswordValid=await userExistence.isPasswordCheck(password)
+    if(!isPasswordValid){
+        throw new ApiError(401,"Incorrect password , enter the correct password")
+    }
+    
+    const {accessToken,refreshToken}=await generateAccessTokenAndRefreshToken(userExistence._id)
+
+
+    const loggedUser=await User.findById(userExistence._id).select("-password -refreshToken")
+
+
+    const option={
+        httpOnly:true,
+        secure:true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,option)
+    .cookie("refreshToken",refreshToken,option)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user:loggedUser,accessToken
+            },
+            "user logged in successfully"
+
+        )
+    )
+
+    
+
+
+
+})
+
+const loogedOut=asyncHandler(async(req,res)=>{
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken:undefined,
+            }
+        }
+
+    )
+
+    const option={
+        httpOnly:true,
+        secure:true,
+    }
+    return res
+    .status(200)
+    .clearCookie("accessToken",option)
+    .clearCookie("refreshToken",option)
+    .json(
+        new ApiResponse(200,{},"User Logged Out Successfully")
+    )
+
+})
+
+
+export {userRegister,loginUser,loogedOut}
