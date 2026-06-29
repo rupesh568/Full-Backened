@@ -38,6 +38,8 @@ router.route("/changeFiles").post(
           maxCount:1,
         },
     ])
+
+  ,verifyJWT
   ,changeCoverImageOrAvatar)
 
 

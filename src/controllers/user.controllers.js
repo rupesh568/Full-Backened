@@ -338,33 +338,43 @@ const changeFullNameOrPassword=asyncHandler(async (req,res)=>{
 
 const changeCoverImageOrAvatar=asyncHandler(async(req,res)=>{
     console.log(req.files)
-    const avatarLocalPath=req.files?.avatar[0].path
-    if(!avatarLocalPath){
-        throw new ApiError(401,"avatarLocal path doesnot exist")
-    }
+    const avatarLocalPath=req.files?.avatar?.[0]?.path
+    
+    const coverImageLocalPath=req.files?.coverImage?.[0]?.path
 
-    const coverImageLocalPath=req.files?.coverImage[0].path 
-    if(!coverImageLocalPath){
-        throw new ApiError(401,"coverImage local path is required")
+    if(!(avatarLocalPath || coverImageLocalPath)){
+        throw new ApiError(401,"At least one field is required")
+    }
+    const user=await User.findById(req.user?._id).select("-password")
+    if(avatarLocalPath){
+        const avatar=await uploadOnCloudinary(avatarLocalPath)
+        if(!avatar){
+            throw new ApiError(401,"Avatar is required")
+        }
+        user.avatar=avatar.url
+        console.log(avatar)
     }
     
+    if(coverImageLocalPath){
+        const coverImage=await uploadOnCloudinary(coverImageLocalPath)
+        if(!coverImage){
+            throw new ApiError(401,"cover image is required")
+        }
+        user.coverImage=coverImage.url
 
-    const avatar=await uploadOnCloudinary(avatarLocalPath)
-    console.log(avatar)
-    if(!avatar){
-        throw new ApiError(400,"Avatar is required")
     }
-
-    const coverImage=await uploadOnCloudinary(coverImageLocalPath)
-    if(!coverImage){
-        throw new ApiError(400,"cover Image is required")
-    }
-
-    const user=await User.findById(req.user?._id)
+    await user.save({validateBeforeSave:false})
     
-    user.avatar=avatar.url
-    user.coverImage=coverImage.url
-    user.save({})
+    
+    
+
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user,"Avatar and coverImage are updated successfully")
+    )
 
 
     
