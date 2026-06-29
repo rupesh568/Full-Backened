@@ -382,6 +382,50 @@ const changeCoverImageOrAvatar=asyncHandler(async(req,res)=>{
      //complete it its main aim is to allow user to change their coverImage or avatar
 })
 
+const userChannelProfile=asyncHandler(async(req,res)=>{
+    const {username} =req.params
+    console.log(req.params)
+    if(!username?.trim()){
+        throw new ApiError(400,"username doesnot exist")
+    }
+
+    const channel=await User.aggreagate([
+        {
+            $match:{
+                username:username.toLowerCase(),
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"channel",
+                as:"subscribers"              //THIS IS THE TOTAL NUMBER OF MY SUBSCRIBERS;
+            }
+        },
+        {
+            $lookup:{
+                from:"subscriptions",
+                localField:"_id",
+                foreignField:"subscriber",
+                as:"subscribedTo"            //THIS IS THE TOTAL NUMBER OF CHANNELS TO WHOM I HAVE SUBSCRIBED
+            } 
+
+            
+        },
+        {
+            $addFields:{         //see here the addFields has added two more attributes to the User Model that means there will be two more columns with the given name in the database
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                channelSubscribedTo:{
+                    $size:"$subscribedTo"
+                }
+            }
+        },
+        
+    ])
+})
 //see one important thing you can set the value of the attributes as well by the help of $set method of mongodb,and using this method:findbyid and update
 
 
