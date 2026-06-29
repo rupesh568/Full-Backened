@@ -382,5 +382,6 @@ const changeCoverImageOrAvatar=asyncHandler(async(req,res)=>{
      //complete it its main aim is to allow user to change their coverImage or avatar
 })
 
+//see one important thing you can set the value of the attributes as well by the help of $set method of mongodb,and using this method:findbyid and update
 
 export {userRegister,loginUser,loogedOut,refreshTokenAccess,currentUser,changePassword,changeFullNameOrPassword,changeCoverImageOrAvatar}
