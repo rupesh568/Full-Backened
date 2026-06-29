@@ -273,7 +273,7 @@ const refreshTokenAccess=asyncHandler(async(req,res)=>{
 })
 
 const changePassword=asyncHandler(async(req,res)=>{
-    const user=await User.findById(req.user?._id)
+    
 
     const {oldPassword,newPassword,confirmPassword}=req.body
 
@@ -283,11 +283,11 @@ const changePassword=asyncHandler(async(req,res)=>{
     if(!isPasswordValid){
         throw new ApiError(401,"Wrong old password,enter the correct old password")
     }
-    if(!(newpassword===confirmPassword)){
+    if(!(newPassword===confirmPassword)){
         throw new ApiError(400,"Both pasword must be same")
     }
     user.password=newPassword
-    await user.sav({validateBeforeSave:false})
+    await user.save({validateBeforeSave:false})
     
     
 
@@ -300,7 +300,7 @@ const changePassword=asyncHandler(async(req,res)=>{
 })
 
 const currentUser=asyncHandler(async(req,res)=>{
-    const currUser=await User.findById(req.body._id)
+    const currUser=await User.findById(req.user?._id)
     return res
     .status(200)
     .json(
@@ -308,6 +308,69 @@ const currentUser=asyncHandler(async(req,res)=>{
     )
 })
 
+const changeFullNameOrPassword=asyncHandler(async (req,res)=>{
+    const {fullName,userName}=req.body
+    if(!(fullName || userName)){
+        throw new ApiError(400,"username or fullname is required")
+    }
+    const user=await User.findById(req.user?._id)
+    if(!user){
+        throw new ApiError(401,"user not found!")
+    }
+    if(fullName){
+        user.fullName=fullName
+    }
+    if(userName){
+        user.userName=userName
+    }
+    
+    await user.save({validateBeforeSave:false})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user,"Fullname or username is successfully updated")
+    )
 
 
-export {userRegister,loginUser,loogedOut,refreshTokenAccess,currentUser,changePassword}
+})
+
+
+const changeCoverImageOrAvatar=asyncHandler(async(req,res)=>{
+    console.log(req.files)
+    const avatarLocalPath=req.files?.avatar[0].path
+    if(!avatarLocalPath){
+        throw new ApiError(401,"avatarLocal path doesnot exist")
+    }
+
+    const coverImageLocalPath=req.files?.coverImage[0].path 
+    if(!coverImageLocalPath){
+        throw new ApiError(401,"coverImage local path is required")
+    }
+    
+
+    const avatar=await uploadOnCloudinary(avatarLocalPath)
+    console.log(avatar)
+    if(!avatar){
+        throw new ApiError(400,"Avatar is required")
+    }
+
+    const coverImage=await uploadOnCloudinary(coverImageLocalPath)
+    if(!coverImage){
+        throw new ApiError(400,"cover Image is required")
+    }
+
+    const user=await User.findById(req.user?._id)
+    
+    user.avatar=avatar.url
+    user.coverImage=coverImage.url
+    user.save({})
+
+
+    
+    
+     //complete it its main aim is to allow user to change their coverImage or avatar
+})
+
+
+export {userRegister,loginUser,loogedOut,refreshTokenAccess,currentUser,changePassword,changeFullNameOrPassword,changeCoverImageOrAvatar}
