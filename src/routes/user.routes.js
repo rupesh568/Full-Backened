@@ -42,6 +42,6 @@ router.route("/changeFiles").post(
   ,verifyJWT
   ,changeCoverImageOrAvatar)
 
-router.route("/c:username").get(verifyJWT,userChannelProfile)
+router.route("/c/:username").get(verifyJWT,userChannelProfile)
 
 export default router
