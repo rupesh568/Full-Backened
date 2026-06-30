@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/Apiresponse.js";
 import { response } from "express";
 console.log("everything is not fine")
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessTokenAndRefreshToken=async(userId)=>{
     const user=await User.findById(userId)
@@ -456,7 +457,7 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
     return res
     .status(200)
     .json(
-        new ApiResponse(201,channel[0],"data fetched successfully..")
+        new ApiResponse(200,channel[0],"data fetched successfully..")
     )
 })
 //see one important thing you can set the value of the attributes as well by the help of $set method of mongodb,and using this method:findbyid and update 
@@ -494,11 +495,26 @@ const watchHistory=asyncHandler(async(req,res)=>{
                         }
                     
                     },
-                    
+                    {
+                        $addFields:{
+                            userInformation:{
+                                $first:"$userInformation"
+                            }
+                        }
+                    }
                 ]
             }
         }
     ])
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            user[0].watchHistory,
+            "watch history fetched successfully"
+        )
+    )
 })
 
 
@@ -510,5 +526,6 @@ export {userRegister,
     changePassword,
     changeFullNameOrPassword,
     changeCoverImageOrAvatar,
-    userChannelProfile
+    userChannelProfile,
+    watchHistory
 }
