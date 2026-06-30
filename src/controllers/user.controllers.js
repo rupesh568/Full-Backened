@@ -400,7 +400,7 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
                 from:"subscriptions",
                 localField:"_id",
                 foreignField:"channel",
-                as:"subscribers"              //THIS IS THE TOTAL NUMBER OF MY SUBSCRIBERS;
+                as:"subscribers"              //THIS IS THE TOTAL NUMBER OF MY SUBSCRIBERS; and also here subscribers is the name of the array which will be formed after joining so we will count it ,to calcualte total number of subscriber
             }
         },
         {
@@ -408,7 +408,7 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
                 from:"subscriptions",
                 localField:"_id",
                 foreignField:"subscriber",
-                as:"subscribedTo"            //THIS IS THE TOTAL NUMBER OF CHANNELS TO WHOM I HAVE SUBSCRIBED
+                as:"subscribedTo"            //THIS IS THE TOTAL NUMBER OF CHANNELS TO WHOM I HAVE SUBSCRIBED and also subscribeTo is the array which will be formed after joining and we will calculate its size to find the total number of channel subscribed by the user.
             } 
 
             
@@ -420,9 +420,32 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
                 },
                 channelSubscribedTo:{
                     $size:"$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        $if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        then:true,
+                        else:false
+                    }
+
                 }
             }
         },
+        {
+            $project:{
+                fullName:1,
+                userName:1,
+                avatar:1,
+                coverImage:1,
+                subscribersCount:1,
+                channelSubscribedTo:1,
+                isSubscribed:1,
+                email:1,
+                createdAt:1
+                
+
+            }
+        }
         
     ])
 })
