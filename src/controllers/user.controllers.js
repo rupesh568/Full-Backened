@@ -389,10 +389,10 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
         throw new ApiError(400,"username doesnot exist")
     }
 
-    const channel=await User.aggreagate([
+    const channel=await User.aggregate([
         {
             $match:{
-                userName:username.toLowerCase(),
+                userName:username?.toLowerCase(),
             }
         },
         {
@@ -423,7 +423,7 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
                 },
                 isSubscribed:{
                     $cond:{
-                        $if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                        if:{$in:[req.user?._id,"$subscribers.subscriber"]},
                         then:true,
                         else:false
                     }
@@ -448,8 +448,27 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
         }
         
     ])
+    if(!channel?.length){
+        throw new ApiError(404,"channel doesnot exist")
+    }
+    console.log(channel)
+   //see we always write return that means whenever our controller is created we always send response to the userBrowse,for example:here we have created the system that tells what data will be sent to the user whenever they visit profile but we have just decided not sent it to the user when they go to that url ,so to set it we return it to the user that data than only that will be seen by the user
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,channel[0],"data fetched successfully..")
+    )
 })
 //see one important thing you can set the value of the attributes as well by the help of $set method of mongodb,and using this method:findbyid and update
 
 
-export {userRegister,loginUser,loogedOut,refreshTokenAccess,currentUser,changePassword,changeFullNameOrPassword,changeCoverImageOrAvatar}
+export {userRegister,
+    loginUser,
+    loogedOut,
+    refreshTokenAccess,
+    currentUser,
+    changePassword,
+    changeFullNameOrPassword,
+    changeCoverImageOrAvatar,
+    userChannelProfile
+}

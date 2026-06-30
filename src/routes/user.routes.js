@@ -5,7 +5,7 @@ import { loginUser } from "../controllers/user.controllers.js";
 import { loogedOut } from "../controllers/user.controllers.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { refreshTokenAccess } from "../controllers/user.controllers.js";
-import { changePassword,changeFullNameOrPassword, currentUser,changeCoverImageOrAvatar} from "../controllers/user.controllers.js";
+import { changePassword,changeFullNameOrPassword, currentUser,changeCoverImageOrAvatar,userChannelProfile} from "../controllers/user.controllers.js";
 const router=Router()
 
 router.route("/register").post(
@@ -42,5 +42,6 @@ router.route("/changeFiles").post(
   ,verifyJWT
   ,changeCoverImageOrAvatar)
 
+router.route("/c:username").get(verifyJWT,userChannelProfile)
 
 export default router
