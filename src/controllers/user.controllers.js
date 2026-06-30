@@ -460,7 +460,7 @@ const userChannelProfile=asyncHandler(async(req,res)=>{  //this means we are vis
     )
 })
 //see one important thing you can set the value of the attributes as well by the help of $set method of mongodb,and using this method:findbyid and update 
-
+//
 const watchHistory=asyncHandler(async(req,res)=>{
     const user=await User.aggregate([
         {
