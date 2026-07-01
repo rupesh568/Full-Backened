@@ -7,6 +7,7 @@ import { response } from "express";
 console.log("everything is not fine")
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { Video } from "../models/video.model.js";
 
 const generateAccessTokenAndRefreshToken=async(userId)=>{
     const user=await User.findById(userId)
@@ -479,7 +480,7 @@ const watchHistory=asyncHandler(async(req,res)=>{
                     {
                         $lookup:{
                             from:"users",
-                            localField:"owner",
+                            localField:"ownership",
                             foreignField:"_id" ,
                             as:"userInformation",
                             pipeline:[
@@ -517,7 +518,53 @@ const watchHistory=asyncHandler(async(req,res)=>{
     )
 })
 
+const uploadVideo=asyncHandler(async(req,res)=>{
+    const{title,description,views,duration,isPublished}=req.body
+    console.log(req.body)
+    if(!title || !description || !views || !duration || !isPublished){
+        throw new ApiError(400,"All fields are required")
+    }
 
+    if(title.length>20){
+        throw new ApiError(401,"title is too long ,enter short")
+    }
+    console.log(req.files)
+    const videoFilePath=await req.files.videoFile?.[0]?.path;
+    console.log(videoFilePath)
+
+    if(!videoFilePath){
+        throw new ApiError(400,"Video doesnot found")
+    }
+
+    const videoUp=await uploadOnCloudinary(videoFilePath)
+    if(!videoUp){
+        throw new ApiError(400,"Video is required")
+    }
+
+    
+    
+    
+    
+    const video=await Video.create({
+        title:title,
+        description:description,
+        views:views,
+        duration:duration,
+        isPublished:isPublished,
+        videoFile:videoUp.url,
+        
+    })
+    if(!video){
+        throw new ApiError(400,"video upload failed")
+    }
+    console.log(video)
+
+    return res
+    .status(400)
+    .json(
+        new ApiResponse(400,video,"video uploaded successfully")
+    )
+})
 export {userRegister,
     loginUser,
     loogedOut,
@@ -527,5 +574,6 @@ export {userRegister,
     changeFullNameOrPassword,
     changeCoverImageOrAvatar,
     userChannelProfile,
-    watchHistory
+    watchHistory,
+    uploadVideo
 }
