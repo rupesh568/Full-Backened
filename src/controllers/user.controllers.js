@@ -518,6 +518,8 @@ const watchHistory=asyncHandler(async(req,res)=>{
     )
 })
 
+
+//watchHistory is successfully running with showing the entire data of the video watched by the user like the video information as well the information of the person who has uploaded the video correctly
 const uploadVideo=asyncHandler(async(req,res)=>{
     const{title,description,views,duration,isPublished}=req.body
     console.log(req.body)
